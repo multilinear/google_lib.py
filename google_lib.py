@@ -5,9 +5,6 @@
 # But, shoudl we change the account it's registered with or something similar note that this file can be
 # run as a binary. When run as a binary it will run through the oauth2 authentication protocol to acquire
 # A credentials file which is then written to the "auth" directory.
-#
-# This is hard-coded to use robot@smalladvntures.net (see the auth/auth.py). So when generating the
-# credentials file be sure to log in as robbie robot.
 
 from __future__ import print_function
 
@@ -407,7 +404,6 @@ def authorize(credential_filename):
       '/var/www/website_src/auth/client_secret_63808424265.apps.googleusercontent.com.json',
       scope='https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/drive',
       redirect_uri='urn:ietf:wg:oauth:2.0:oob'
-     # redirect_uri='http://smalladventures.net'
       )
   auth_uri = flow.step1_get_authorize_url()
   print(auth_uri)
