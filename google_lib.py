@@ -9,10 +9,14 @@
 from __future__ import print_function
 
 # NOTE: requires pyopenssl to work
+# also pytz, datetime, and iso8601
 
 import httplib2
 import os
 import sys
+import iso8601
+import pytz
+import unicodedata
 
 from apiclient import errors
 from apiclient.discovery import build
@@ -20,6 +24,24 @@ from oauth2client.client import SignedJwtAssertionCredentials
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.file import Storage
+
+def deunicodize(s):
+  """ Take a unicode string and strip it down to ascii. """
+  return unicodedata.normalize('NFKD', s).encode('ascii','ignore')
+
+
+def format_display_timerange(fromdate, todate):
+  """ Take time period between two datetime objects and format for humans. """
+  if fromdate.tzname() == todate.tzname():
+    if fromdate.year == todate.year:
+      if fromdate.month == todate.month and fromdate.day == todate.day:
+        return fromdate.strftime('From %T') + todate.strftime(' To %T %b %d %Y timezone GMT %Z')
+      else:
+        return fromdate.strftime('From %b %d %T') + todate.strftime(' To %b %d %T %Y timezone GMT %Z')
+    else:
+      return fromdate.strftime('From %b %d %Y %T') + todate.strftime(' To %b %d %Y %T timezone GMT %Z')
+  else:   
+    return fromdate.strftime('From %b %d %Y %T timezone GMT %Z') + todate.strftime(' To %b %d %Y %T timezone GMT %Z') 
 
 
 # It may eventually be worthwhile to track Ids as well... in case we run two
@@ -29,23 +51,35 @@ class Event(object):
   def __init__(self, cal_event):
     self._event = cal_event
     self._modified = False
+    # Warning, this is what we generally use
+    # so should you decide to "set" these, set starttime and translate back to "_event" in the setter
+    # only "_event" will get pushed back to the calendar
+    self._starttime = iso8601.iso8601.parse_date(deunicodize(self._event['start']['dateTime']))
+    self._stoptime = iso8601.iso8601.parse_date(deunicodize(self._event['end']['dateTime']))
 
   def title(self):
     return self._event['summary']
 
-  def time(self):
-    return str(self._event['start']['dateTime']).replace('T','/')
+  def start_isotime(self):
+    return self._starttime.isoformat()
 
-  def timezone(self):
-    return str(self._event['start'].get('timeZone', ''))
+  def stop_isotime(self):
+    return self._stoptime.isoformat()
+
+  def start_displaytime(self):
+    return self._starttime.strftime('%b %d %Y %T timezone GMT %Z')
+
+  def stop_displaytime(self):
+    return self._stoptime.strftime('%b %d %Y %T timezone GMT %Z')
+
+  def start_datetime(self):
+    return self._starttime
+
+  def stop_datetime(self):
+    return self._stoptime
 
   def location(self):
     return str(self._event.get('location',''))
-
-  def set_location(self, loc):
-    if self._event['location'] != loc:
-      self._event['location'] = loc
-      self._modified = True
 
   def description(self):
     return str(self._event.get('description', ''))
@@ -65,14 +99,14 @@ class Event(object):
     return self._modified
 
   def __str__(self):
-    s = self._event['summary'] + \
-        '_' + self.location() + \
-        '_' + self.time() + \
-        '_' + self.timezone()
+    s = self._event['summary'] + self.iso_time_and_location()
     return s
 
-  def time_and_location(self):
-    return self.location() + ' ' + self.time() + ' ' + self.timezone()
+  def display_time_and_location(self):
+    return format_display_timerange(self._starttime, self._stoptime)
+
+  def iso_time_and_location(self):
+    return self.location() + ' ' + self.start_isotime() + ' ' + self.stop_isotime()
 
 
 class Perm(object):
