@@ -106,6 +106,8 @@ class Event(object):
     return format_display_timerange(self._starttime, self._stoptime)
 
   def iso_time_and_location(self):
+    # Note, this needs to have no spaces in it!
+    # we use this for URLs and stuff - yeah it's a terrible cross dependency *shrug*
     return self.location() + '_' + self.start_isotime() + '_' + self.stop_isotime()
 
 
