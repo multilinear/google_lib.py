@@ -99,7 +99,7 @@ class Event(object):
     return self._modified
 
   def __str__(self):
-    s = self._event['summary'] + self.iso_time_and_location()
+    s = self._event['summary'] + '_' + self.iso_time_and_location()
     return s
 
   def display_time_and_location(self):
