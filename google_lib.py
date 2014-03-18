@@ -106,7 +106,7 @@ class Event(object):
     return format_display_timerange(self._starttime, self._stoptime)
 
   def iso_time_and_location(self):
-    return self.location() + ' ' + self.start_isotime() + ' ' + self.stop_isotime()
+    return self.location() + '_' + self.start_isotime() + '_' + self.stop_isotime()
 
 
 class Perm(object):
