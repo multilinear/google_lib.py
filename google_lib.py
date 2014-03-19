@@ -11,6 +11,8 @@ from __future__ import print_function
 # NOTE: requires pyopenssl to work
 # also pytz, datetime, and iso8601
 
+# gdata, (python-gdata on debian)
+
 import httplib2
 import os
 import sys
@@ -99,7 +101,7 @@ class Event(object):
     return self._modified
 
   def __str__(self):
-    s = self._event['summary'] + '_' + self.iso_time_and_location()
+    s = self._event['summary'] + self.iso_time_and_location()
     return s
 
   def display_time_and_location(self):
@@ -154,7 +156,7 @@ class Perm(object):
 def set_acls_helper(object, perms, id):
   # Get existing permissions
   existing_perms = object.get_perms(id)
-  print('existing perms: ', str(existing_perms))
+  #print('existing perms: ', str(existing_perms))
   # compute changes
   add_perms = perms.difference(existing_perms)
   add_roles = add_perms.roles_dict() 
@@ -250,7 +252,7 @@ class Calendar(object):
     return all_events 
 
   def update_event(self, event, calendarId=None):
-    print('Called update_event')
+    #print('Called update_event')
     if not event.is_modified():
       return event
     print('Updating event: ' + str(event))
