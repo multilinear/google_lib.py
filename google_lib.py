@@ -9,7 +9,7 @@
 from __future__ import print_function
 
 # NOTE: requires pyopenssl to work
-# also pytz, datetime, and iso8601
+# also datetime, and iso8601
 
 # gdata, (python-gdata on debian)
 
@@ -17,7 +17,6 @@ import httplib2
 import os
 import sys
 import iso8601
-import pytz
 import unicodedata
 
 from apiclient import errors
